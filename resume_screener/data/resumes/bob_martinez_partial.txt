@@ -1,0 +1,21 @@
+Bob Martinez | bob.m@gmail.com
+Python Developer — 3 years
+
+EXPERIENCE
+Python Developer @ Webagency (2022–Present)
+- Developed REST APIs with Django REST Framework
+- PostgreSQL database design
+- Basic Docker containerisation
+- Integrated Stripe, Sendgrid APIs
+
+Junior Developer @ CodeShop (2021–2022)
+- PHP + Python scripting for data exports
+- Basic AWS S3 usage
+
+SKILLS
+Python, Django REST Framework, PostgreSQL, Docker (basic), Git, AWS S3
+
+EDUCATION
+B.Sc. Information Technology — State University (2021)
+
+Note: No Kubernetes or CI/CD pipeline experience yet.

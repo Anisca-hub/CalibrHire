@@ -1,0 +1,21 @@
+Alice Chen | alice@email.com
+Senior Software Engineer — 7 years experience
+
+EXPERIENCE
+Lead Python Developer @ TechCorp (2020–Present)
+- Architected microservices platform (FastAPI + Kubernetes) handling 2M req/day
+- Led team of 6, cut deployment time 60% via GitHub Actions CI/CD
+- Tech: Python, FastAPI, PostgreSQL, Redis, Docker, K8s, AWS (EC2, RDS, S3, Lambda)
+
+Senior Python Developer @ DataFlow (2018–2020)
+- Built real-time ETL with Apache Kafka + Python
+- ML model serving with TensorFlow + FastAPI
+
+SKILLS
+Python, FastAPI, Django REST, PostgreSQL, Redis, Docker, Kubernetes,
+AWS, GitHub Actions, Jenkins, TensorFlow, PyTorch
+
+EDUCATION
+M.Sc. Computer Science — Stanford University (2017)
+
+OPEN SOURCE: Contributor to FastAPI, 3 published PyPI packages

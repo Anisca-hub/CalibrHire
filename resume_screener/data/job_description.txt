@@ -1,0 +1,20 @@
+
+Senior Python Developer
+
+We are looking for an experienced Python developer to join our platform team.
+
+Requirements:
+- 5+ years of professional Python development
+- Strong knowledge of FastAPI or Django REST framework
+- Experience with PostgreSQL and Redis
+- Proficiency in Docker and Kubernetes
+- Familiarity with AWS (EC2, RDS, S3, Lambda)
+- Experience with CI/CD pipelines (GitHub Actions, Jenkins)
+- Understanding of microservices architecture
+- Strong communication skills
+
+Nice to have:
+- Open-source contributions
+- Experience with ML/AI frameworks (PyTorch, TensorFlow)
+
+Education: Bachelor's or Master's degree in Computer Science or equivalent.

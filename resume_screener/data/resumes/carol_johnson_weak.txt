@@ -1,0 +1,17 @@
+Carol Johnson | carol@mail.com
+Junior Software Developer — 1 year experience
+
+EXPERIENCE
+Junior Developer @ SmallBiz (2023–Present)
+- Maintained legacy PHP website
+- Wrote Python scripts for data cleanup
+- Used Git for version control
+
+Intern @ LocalAgency (2023, 3 months)
+- HTML/CSS website updates
+
+SKILLS
+Python (beginner), PHP, HTML, CSS, Git, MySQL (basic)
+
+EDUCATION
+B.A. Business Administration — Community College (2023)
