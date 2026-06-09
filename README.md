@@ -4,24 +4,24 @@ CalibrHire is an intelligent, automated resume screening tool designed to bridge
 
 🚀 **Features**
 
-Automated Resume Parsing: Effortlessly extract structured data (education, skills, work experience) from unstructured resume documents.
+-> Automated Resume Parsing: Effortlessly extract structured data (education, skills, work experience) from unstructured resume documents.
 
-Intelligent Matching: Compare candidate profiles directly against job descriptions to identify the strongest matches.
+-> Intelligent Matching: Compare candidate profiles directly against job descriptions to identify the strongest matches.
 
-Efficient Filtering: Reduce manual screening time by ranking candidates based on relevance and skill alignment.
+-> Efficient Filtering: Reduce manual screening time by ranking candidates based on relevance and skill alignment.
 
-Scalable Architecture: Built to handle large volumes of applications with high accuracy and speed.
+-> Scalable Architecture: Built to handle large volumes of applications with high accuracy and speed.
 
 
 🛠 **Tech Stack**
 
-Language: Python
+* Language: Python
 
-Core Functionality: [Include specific libraries, e.g., spaCy for NLP, PyPDF2/docx2txt for parsing]
+* Core Functionality: [Include specific libraries, e.g., spaCy for NLP, PyPDF2/docx2txt for parsing]
 
-Matching Algorithm: [Specify method, e.g., Cosine Similarity, TF-IDF, or LLM-based embedding]
+* Matching Algorithm: [Specify method, e.g., Cosine Similarity, TF-IDF, or LLM-based embedding]
 
-Data Handling: [Specify framework, e.g., Pandas/NumPy]
+* Data Handling: [Specify framework, e.g., Pandas/NumPy]
 
 
 ⚙️ **Quick Start**
@@ -55,7 +55,7 @@ venv\Scripts\activate
 Once the environment is active, install the required packages:
 pip install -r requirements.txt
 
-4. Execution
+**4. Execution**
 
 Run the screening tool by providing the paths to your resume directory and the job description file:
 
