@@ -9,33 +9,31 @@ import plotly.graph_objects as go
 
 # Imports from your src
 from src.extractor import ResumeExtractor
-from src.scorer import ScoringWeights
+from src.scorer import ScoringWeights, ResumeScorer
 from src.screener import ResumeScreener
-from src.utils import (
-    setup_logging, format_duration, estimate_tokens
-)
+from src.utils import format_duration, estimate_tokens
 
 st.set_page_config(page_title="CalibrHire", page_icon="🎯", layout="wide")
 
 # ─────────────────────────── Enhanced CSS ─────────────────────────────
 st.markdown("""
 <style>
-    .main { background-color: #f8fafc; }
     .stApp { background: #f8fafc; }
     .header-card { 
         background: linear-gradient(135deg, #1e293b, #334155); 
-        padding: 2.5rem; border-radius: 16px; color: white; 
-        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); margin-bottom: 20px;
+        padding: 2rem; border-radius: 12px; color: white; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem;
     }
     .metric-card { 
-        background: white; border-radius: 12px; padding: 1.5rem; 
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-left: 5px solid #3b82f6;
+        background: white; border-radius: 10px; padding: 1.2rem; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #3b82f6;
     }
     .gemini-badge {
-        background: linear-gradient(135deg, #4285f4, #34a853); color: white; 
-        padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+        background: #eff6ff; color: #1e40af; padding: 4px 10px; 
+        border-radius: 6px; font-size: 0.8rem; font-weight: 600; border: 1px solid #bfdbfe;
     }
-    .stButton>button { width: 100%; border-radius: 8px; font-weight: 600; }
+    .stButton>button { width: 100%; border-radius: 6px; font-weight: 600; }
+    div.stExpander { border-radius: 8px; border: 1px solid #e2e8f0; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -49,16 +47,14 @@ st.markdown('<div class="header-card"><h1>🎯 CalibrHire</h1><p>AI-Powered Tale
 
 # ═══════════════════════════ SIDEBAR ════════════════════════════════
 with st.sidebar:
-    st.header("⚙️ Configuration")
+    st.header("⚙️ Engine Config")
     provider = st.selectbox("AI Provider", ["Google Gemini (FREE ✅)", "Anthropic (Claude)", "OpenAI (GPT)"])
     
-    if "Gemini" in provider:
-        prov_key = "gemini"
-        st.markdown('<div class="gemini-badge">🆓 Free Tier</div>', unsafe_allow_html=True)
-    else:
-        prov_key = "api"
+    prov_key = "gemini" if "Gemini" in provider else "api"
+    if prov_key == "gemini":
+        st.markdown('<div class="gemini-badge">Free Tier — No billing needed</div>', unsafe_allow_html=True)
 
-    api_key = st.text_input("API Key", type="password", help="Your AI provider API key.")
+    api_key = st.text_input("API Key", type="password")
     model_override = st.text_input("Model (optional)", placeholder="e.g. gemini-1.5-flash")
 
     st.divider()
@@ -278,171 +274,83 @@ Certifications: Python Basics (Coursera 2023)""",
             f"{session.total_tokens:,} tokens used"
         )
         st.info("Go to the **Results** tab to view rankings.")
-
+    pass
 
 # ──────────────────── TAB 2: Results ────────────────────────────────
 with tab_results:
-    session = st.session_state.session_results
-
-    if session is None:
-        st.info("Run a screening session to see results here.")
+    if "session_results" not in st.session_state or st.session_state.session_results is None:
+        st.info("🚀 Run a screening session to see analytics.")
     else:
-        ranked = session.ranked
-
-        # Summary metric cards
-        mc = st.columns(4)
-        counts = {"Strong Yes": 0, "Yes": 0, "Maybe": 0, "No": 0}
+        ranked = st.session_state.session_results.ranked
+        
+        # 1. METRIC BOXES AT TOP
+        # Initialize an empty dictionary
+        stats = {}
+        
         for r in ranked:
-            counts[r.recommendation] = counts.get(r.recommendation, 0) + 1
+            cat = r.recommendation.replace("Strong Yes", "Strong")
+            # If the category isn't in the dictionary, it starts at 0, then adds 1
+            stats[cat] = stats.get(cat, 0) + 1
+            
+        colors = {"Strong": "#10b981", "Yes": "#005ecb", "Maybe": "#d97706", "No": "#ef4444"}
+        
+        # Only iterate over the categories that actually exist in your data
+        cols = st.columns(len(stats) if len(stats) > 0 else 1)
+        if len(stats) > 0:
+            for col, (label, count) in zip(cols, stats.items()):
+                col.markdown(f"""
+                <div style="background-color: {colors.get(label, '#94a3b8')}; padding: 10px; border-radius: 5px; color: white; text-align: center; font-weight: bold;">
+                    {label}<br><span style="font-size: 1.2rem;">{count}</span>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("No data available to display metrics.")
 
-        colours = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444"]
-        for col, (label, colour) in zip(mc, zip(counts.keys(), colours)):
-            with col:
-                st.markdown(f"""
-                <div class="metric-card">
-                  <div class="value" style="color:{colour}">{counts[label]}</div>
-                  <div class="label">{label}</div>
-                </div>""", unsafe_allow_html=True)
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        # Score bar chart
+        # 2. GRAPH: Origin-to-value lines + Forced 4-item Legend
+        # 2. GRAPH: Origin-to-value lines (Horizontal) + Forced 4-item Legend
         if ranked:
-            colour_map = {
-                "Strong Yes": "#10b981", "Yes": "#3b82f6",
-                "Maybe": "#f59e0b", "No": "#ef4444",
-            }
-            fig = go.Figure(go.Bar(
-                x=[r.overall_score for r in ranked],
-                y=[r.filename[:30] for r in ranked],
-                orientation="h",
-                marker_color=[colour_map.get(r.recommendation, "#6b7280") for r in ranked],
-                text=[f"{r.overall_score:.1f}" for r in ranked],
-                textposition="outside",
-            ))
+            fig = go.Figure()
+            
+            # Draw horizontal lines from origin (0, score) to each data point (i, score)
+            for i, r in enumerate(ranked):
+                fig.add_trace(go.Scatter(
+                    x=[0, i], y=[r.overall_score, r.overall_score],
+                    mode='lines', line=dict(color='black', width=1),
+                    showlegend=False, hoverinfo='skip'
+                ))
+            
+            # Add points, ensuring all 4 categories are forced into the legend
+            for cat, color in colors.items():
+                cat_indices = [i for i, r in enumerate(ranked) if r.recommendation.replace("Strong Yes", "Strong") == cat]
+                has_data = len(cat_indices) > 0
+                fig.add_trace(go.Scatter(
+                    x=[i for i in cat_indices] if has_data else [None],
+                    y=[ranked[i].overall_score for i in cat_indices] if has_data else [None],
+                    mode='markers', name=cat,
+                    marker=dict(color=color, size=12),
+                    showlegend=True
+                ))
+            
             fig.update_layout(
-                xaxis=dict(range=[0, 115], title="Score (0–100)"),
-                yaxis=dict(autorange="reversed"),
-                height=max(250, len(ranked) * 55 + 80),
-                margin=dict(l=0, r=50, t=30, b=30),
-                plot_bgcolor="white", paper_bgcolor="white",
+                plot_bgcolor="white",
+                xaxis=dict(showgrid=False, zeroline=True, linecolor='gray', showticklabels=False),
+                yaxis=dict(range=[0, 105], showgrid=False, zeroline=True, linecolor='gray'),
+                legend=dict(
+                    orientation="v", x=1.00, y=1.00, 
+                    xanchor="right", yanchor="top",
+                    bordercolor="gray", borderwidth=1,
+                    traceorder="normal"
+                ),
+                margin=dict(l=40, r=120, t=20, b=40)
             )
-            fig.add_vline(x=80, line_dash="dot", line_color="#10b981", annotation_text="Strong Yes ≥80")
-            fig.add_vline(x=65, line_dash="dot", line_color="#3b82f6", annotation_text="Yes ≥65")
-            fig.add_vline(x=45, line_dash="dot", line_color="#f59e0b", annotation_text="Maybe ≥45")
+            
             st.plotly_chart(fig, use_container_width=True)
 
-        # Results table
-        st.subheader("📋 Ranked Candidates")
-        rows = []
-        for rank, r in enumerate(ranked, 1):
-            rows.append({
-                "Rank": rank,
-                "Filename": r.filename,
-                "Score": r.overall_score,
-                "Recommendation": r.recommendation,
-                "Experience (yrs)": r.years_of_experience,
-                "Education": r.education_level,
-                "Matched Skills": len(r.matched_skills),
-                "Missing Skills": len(r.missing_skills),
-            })
-        if rows:
-            df = pd.DataFrame(rows)
-            st.dataframe(
-                df, use_container_width=True, hide_index=True,
-                column_config={
-                    "Score": st.column_config.ProgressColumn(
-                        "Score", min_value=0, max_value=100, format="%.1f"
-                    ),
-                },
-            )
-
-        # Candidate detail expanders
-        st.subheader("🔎 Candidate Details")
-        for rank, r in enumerate(ranked, 1):
-            with st.expander(f"#{rank} · {r.filename}  —  Score: {r.overall_score:.1f}  · {r.recommendation}"):
-                if r.error:
-                    st.error(f"Error: {r.error}")
-                    continue
-
-                dcol1, dcol2 = st.columns(2)
-                with dcol1:
-                    st.markdown("**📊 Dimension Scores**")
-                    for dim, score in [
-                        ("Skills", r.skills_score),
-                        ("Experience", r.experience_score),
-                        ("Education", r.education_score),
-                        ("Cultural Fit", r.cultural_fit_score),
-                    ]:
-                        st.metric(dim, f"{score:.0f}/100")
-
-                with dcol2:
-                    st.markdown("**👤 Candidate Info**")
-                    st.write(f"**Experience:** {r.years_of_experience} years")
-                    st.write(f"**Education:** {r.education_level or 'Not specified'}")
-                    if r.matched_skills:
-                        st.write(f"**✅ Matched:** {', '.join(r.matched_skills[:5])}")
-                    if r.missing_skills:
-                        st.write(f"**❌ Missing:** {', '.join(r.missing_skills[:5])}")
-
-                st.markdown("**📝 Summary**")
-                st.info(r.summary)
-                st.markdown("**⚖️ Justification**")
-                st.warning(r.justification)
-
-                # Radar chart
-                cats = ["Skills", "Experience", "Education", "Cultural Fit"]
-                vals = [r.skills_score, r.experience_score, r.education_score, r.cultural_fit_score]
-                fig_r = go.Figure(go.Scatterpolar(
-                    r=vals + [vals[0]], theta=cats + [cats[0]],
-                    fill="toself", fillcolor="rgba(48,43,99,.2)",
-                    line_color="#302b63",
-                ))
-                fig_r.update_layout(
-                    polar=dict(radialaxis=dict(range=[0, 100])),
-                    height=280, margin=dict(l=40, r=40, t=30, b=30),
-                    paper_bgcolor="white",
-                )
-                st.plotly_chart(fig_r, use_container_width=True)
-
-        # Export
+        # 3. EXPORT
         st.divider()
-        if ranked:
-            from io import StringIO
-            import csv as csv_mod
-
-            buf = StringIO()
-            fieldnames = [
-                "rank", "filename", "overall_score", "recommendation",
-                "years_of_experience", "education_level",
-                "skills_score", "experience_score", "education_score",
-                "cultural_fit_score", "matched_skills", "missing_skills",
-                "summary", "justification",
-            ]
-            writer = csv_mod.DictWriter(buf, fieldnames=fieldnames, extrasaction="ignore")
-            writer.writeheader()
-            for rank, r in enumerate(ranked, 1):
-                row = r.to_dict()
-                row["rank"] = rank
-                row["matched_skills"] = ", ".join(row.get("matched_skills") or [])
-                row["missing_skills"]  = ", ".join(row.get("missing_skills")  or [])
-                writer.writerow(row)
-
-            c1, c2 = st.columns(2)
-            with c1:
-                st.download_button(
-                    "⬇️ Download CSV", data=buf.getvalue(),
-                    file_name="screening_results.csv", mime="text/csv",
-                    use_container_width=True,
-                )
-            with c2:
-                st.download_button(
-                    "⬇️ Download JSON",
-                    data=json.dumps({"results": [r.to_dict() for r in ranked]}, indent=2),
-                    file_name="screening_results.json", mime="application/json",
-                    use_container_width=True,
-                )
-
+        c1, c2 = st.columns(2)
+        c1.download_button("⬇️ Export CSV", data=pd.DataFrame([r.to_dict() for r in ranked]).to_csv(), file_name="results.csv", use_container_width=True)
+        c2.download_button("⬇️ Export JSON", data=json.dumps([r.to_dict() for r in ranked]), file_name="results.json", use_container_width=True)
 
 # ──────────────────── TAB 3: History ────────────────────────────────
 with tab_history:
@@ -456,9 +364,4 @@ with tab_history:
         if st.button("🗑️ Clear history"):
             st.session_state.history = []
             st.rerun()
-
-# ──────────────────── Footer ─────────────────────────────────────────
-st.markdown("---")
-st.caption(
-    "CalibrHire by Anisca Jha"
-)
+    pass
