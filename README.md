@@ -1,8 +1,8 @@
-🎯 CalibrHire 
+🎯 **CalibrHire**
 
 CalibrHire is an intelligent, automated resume screening tool designed to bridge the gap between recruiters and the perfect candidate. By leveraging advanced parsing and matching algorithms, it streamlines the hiring pipeline, ensuring that the best talent rises to the top efficiently.
 
-🚀 Features
+🚀 **Features**
 
 Automated Resume Parsing: Effortlessly extract structured data (education, skills, work experience) from unstructured resume documents.
 
@@ -13,7 +13,7 @@ Efficient Filtering: Reduce manual screening time by ranking candidates based on
 Scalable Architecture: Built to handle large volumes of applications with high accuracy and speed.
 
 
-🛠 Tech Stack
+🛠 **Tech Stack**
 
 Language: Python
 
@@ -24,9 +24,9 @@ Matching Algorithm: [Specify method, e.g., Cosine Similarity, TF-IDF, or LLM-bas
 Data Handling: [Specify framework, e.g., Pandas/NumPy]
 
 
-⚙️ Quick Start
+⚙️ **Quick Start**
 
-1. Clone the Repository
+**1. Clone the Repository**
 
 Start by cloning the project to your local machine:
 
@@ -34,23 +34,23 @@ git clone https://github.com/Anisca-hub/CalibrHire.git
 
 cd CalibrHire
 
-2. Set Up Virtual Environment
+**2. Set Up Virtual Environment**
 
 Create and activate your virtual environment to keep dependencies isolated:
 
-# Create the environment
+Create the environment
 
 python -m venv venv
 
-# Activate it
+Activate it
 
-# On macOS/Linux:
+On macOS/Linux:
 source venv/bin/activate
 
-# On Windows:
+On Windows:
 venv\Scripts\activate
 
-3. Install Dependencies
+**3. Install Dependencies**
 
 Once the environment is active, install the required packages:
 pip install -r requirements.txt
